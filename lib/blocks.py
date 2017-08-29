@@ -48,14 +48,21 @@ def move_creature(creature, grid, color_map):
     return grid
 
 
+# App globals config
+def create_config():
+    return {
+        'width': 4,
+        'height': 4,
+        'scale': 100
+    }
+
+
 # App
 class App:
     def __init__(self):
         self._running = True
         self._display_surf = None
-        self.width = 4
-        self.height = 4
-        self.scale = 100
+        self.width, self.height, self.scale = create_config().values()
         self.win_width = self.width * self.scale
         self.win_height = self.height * self.scale
         self.size = self.win_width, self.win_height
