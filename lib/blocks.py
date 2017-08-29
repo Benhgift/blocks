@@ -70,10 +70,13 @@ class App:
         pygame.init()
         self._display_surf = pygame.display.set_mode(self.size, pygame.HWSURFACE | pygame.DOUBLEBUF)
         self._running = True
+        self._paused = False
 
     def on_event(self, event):
         if event.type == pygame.QUIT:
             self._running = False
+
+        self.handle_key_press(event)
 
     def on_loop(self):
         pass
@@ -88,8 +91,18 @@ class App:
                 y = i * self.scale
                 pygame.draw.rect(self._display_surf, color, pygame.Rect(x, y, self.scale-5, self.scale-5))
         pygame.display.flip()
-        self.grid = move_creature(self.creature, self.grid, self.color_map)
+
+        if not self._paused:
+            self.grid = move_creature(self.creature, self.grid, self.color_map)
         time.sleep(.1)
+
+    def handle_key_press(self, event):
+        if event.type == KEYDOWN:
+            if event.key == K_ESCAPE:
+                self._running = False
+
+            if event.key == K_p:
+                self._paused = not self._paused
 
     def on_cleanup(self):
         pygame.quit()
