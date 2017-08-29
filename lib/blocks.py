@@ -57,21 +57,36 @@ def create_config():
     }
 
 
+def create_default_color_map():
+    blue = lambda: (0, 128, 255)
+    grey = lambda: (randint(100, 120), 128, 128)
+    return {'blue': blue, 'grey': grey}
+
+
+
+def main_loop():
+    app = App(create_config())
+
+    # grid = create_grid(app.width, app.height, create_default_color_map())
+    creature = create_creature()
+
+    while app._running:
+        state = app.on_execute()
+
+
 # App
 class App:
-    def __init__(self):
+    def __init__(self, config = create_config()):
         self._running = True
         self._display_surf = None
         self.width, self.height, self.scale = create_config().values()
         self.win_width = self.width * self.scale
         self.win_height = self.height * self.scale
         self.size = self.win_width, self.win_height
-        rand_color = lambda: randint(0, 255)
-        blue = lambda: (0, 128, 255)
-        grey = lambda: (randint(100, 120), 128, 128)
-        self.color_map = {'blue': blue, 'grey': grey}
+        self.color_map = create_default_color_map()
         self.grid = create_grid(self.width, self.height, self.color_map)
         self.creature = create_creature()
+        self.on_init()
 
     def on_init(self):
         pygame.init()
@@ -89,9 +104,6 @@ class App:
         pass
 
     def on_render(self):
-        scale_for_box = lambda x: int(self.scale / len(x))
-        width = scale_for_box(self.grid[0])
-        height = scale_for_box(self.grid)
         for i, row in enumerate(self.grid):
             for j, color in enumerate(row):
                 x = j * self.scale
@@ -115,12 +127,11 @@ class App:
         pygame.quit()
 
     def on_execute(self):
-        if self.on_init():
-            self._running = False
-
-        while (self._running):
+        if self._running:
             for event in pygame.event.get():
                 self.on_event(event)
             self.on_loop()
             self.on_render()
-        self.on_cleanup()
+        else:
+            self.on_cleanup()
+        return self._running
