@@ -19,7 +19,10 @@ def move_to_pos(grid, row, column, creature, color_map):
 
 # Creature
 def create_creature():
-    creature = {'position': {'row': 0, 'column': 0}}
+    creature = {
+        'position': {'row': 0, 'column': 0}, 
+        'facing': 'south',
+    }
     return creature
 
 
@@ -51,15 +54,15 @@ def move_creature(creature, grid, color_map):
 # App globals config
 def create_config():
     return {
-        'width': 4,
-        'height': 4,
+        'width': 8,
+        'height': 8,
         'scale': 100
     }
 
 
 def create_default_color_map():
     blue = lambda: (0, 128, 255)
-    grey = lambda: (randint(100, 120), 128, 128)
+    grey = lambda: (128, randint(90, 130), 128)
     return {'blue': blue, 'grey': grey}
 
 
@@ -67,11 +70,22 @@ def create_default_color_map():
 def main_loop():
     app = App(create_config())
 
-    # grid = create_grid(app.width, app.height, create_default_color_map())
+    color_map = create_default_color_map()
+    grid = create_grid(app.width, app.height, color_map)
     creature = create_creature()
+    app = handle_events(app)
 
     while app._running:
-        state = app.on_execute()
+        render(app, grid)
+
+        if not app._paused:
+            grid = move_creature(creature, grid, color_map)
+
+        if not app._running:
+            pygame.quit()
+
+        app = handle_events(app)
+        time.sleep(.03)
 
 
 # App
@@ -94,44 +108,29 @@ class App:
         self._running = True
         self._paused = False
 
-    def on_event(self, event):
-        if event.type == pygame.QUIT:
-            self._running = False
 
-        self.handle_key_press(event)
+def render(app, grid):
+    for i, row in enumerate(grid):
+        for j, color in enumerate(row):
+            x = j * app.scale
+            y = i * app.scale
+            pygame.draw.rect(app._display_surf, color, pygame.Rect(x, y, app.scale-5, app.scale-5))
+    pygame.display.flip()
 
-    def on_loop(self):
-        pass
 
-    def on_render(self):
-        for i, row in enumerate(self.grid):
-            for j, color in enumerate(row):
-                x = j * self.scale
-                y = i * self.scale
-                pygame.draw.rect(self._display_surf, color, pygame.Rect(x, y, self.scale-5, self.scale-5))
-        pygame.display.flip()
+def handle_events(app):
+    for event in pygame.event.get():
+        app = handle_key_press(app, event)
+    return app
 
-        if not self._paused:
-            self.grid = move_creature(self.creature, self.grid, self.color_map)
-        time.sleep(.1)
 
-    def handle_key_press(self, event):
-        if event.type == KEYDOWN:
-            if event.key == K_ESCAPE:
-                self._running = False
+def handle_key_press(app, event):
+    if event.type == pygame.QUIT:
+        app._running = False
+    if event.type == KEYDOWN:
+        if event.key == K_ESCAPE:
+            app._running = False
 
-            if event.key == K_p:
-                self._paused = not self._paused
-
-    def on_cleanup(self):
-        pygame.quit()
-
-    def on_execute(self):
-        if self._running:
-            for event in pygame.event.get():
-                self.on_event(event)
-            self.on_loop()
-            self.on_render()
-        else:
-            self.on_cleanup()
-        return self._running
+        if event.key == K_p:
+            app._paused = not app._paused
+    return app
