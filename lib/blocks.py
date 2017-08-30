@@ -91,22 +91,16 @@ def main_loop():
 # App
 class App:
     def __init__(self, config = create_config()):
-        self._running = True
-        self._display_surf = None
-        self.width, self.height, self.scale = create_config().values()
-        self.win_width = self.width * self.scale
-        self.win_height = self.height * self.scale
-        self.size = self.win_width, self.win_height
-        self.color_map = create_default_color_map()
-        self.grid = create_grid(self.width, self.height, self.color_map)
-        self.creature = create_creature()
-        self.on_init()
-
-    def on_init(self):
+        _running = True
+        _paused = False
+        _display_surf = None
+        width, height, scale = create_config().values()
+        win_width = width * scale
+        win_height = height * scale
+        size = win_width, win_height
         pygame.init()
-        self._display_surf = pygame.display.set_mode(self.size, pygame.HWSURFACE | pygame.DOUBLEBUF)
-        self._running = True
-        self._paused = False
+        _display_surf = pygame.display.set_mode(size, pygame.HWSURFACE | pygame.DOUBLEBUF)
+        self.__dict__.update(locals())
 
 
 def render(app, grid):
