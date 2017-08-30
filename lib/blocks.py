@@ -8,20 +8,21 @@ import time
 def create_grid(width, height, colors):
     column = lambda: [colors['grey']() for _ in range(width)]
     rows = [column() for _ in range(height)]
-
     return rows
 
 
-def move_to_pos(grid, row, column, creature, color_map):
-    grid[row][column] = color_map['blue']()
+def move_to_pos(grid, row, column, creature, color):
+    grid[row][column] = color
     return grid
 
 
 # Creature
-def create_creature():
+def create_creature(row=0, column=0):
     creature = {
-        'position': {'row': 0, 'column': 0}, 
+        'position': {'row': row, 'column': column}, 
         'facing': 'south',
+        'nutrition': 5,
+        'hp': 500,
     }
     return creature
 
@@ -47,7 +48,7 @@ def move_creature(creature, grid, color_map):
         new_pos = [row, column+1]
     creature['position']['row'] = new_pos[0]
     creature['position']['column'] = new_pos[1]
-    grid = move_to_pos(grid, new_pos[0], new_pos[1], creature, color_map)
+    grid = move_to_pos(grid, new_pos[0], new_pos[1], creature, color_map['blue']())
     return grid
 
 
@@ -63,8 +64,8 @@ def create_config():
 def create_default_color_map():
     blue = lambda: (0, 128, 255)
     grey = lambda: (128, randint(90, 130), 128)
-    return {'blue': blue, 'grey': grey}
-
+    yellow = lambda: (200, randint(0, 130), 255)
+    return {'blue': blue, 'grey': grey, 'yellow': yellow}
 
 
 def main_loop():
@@ -73,6 +74,12 @@ def main_loop():
     color_map = create_default_color_map()
     grid = create_grid(app.width, app.height, color_map)
     creature = create_creature()
+    food_maker = lambda: create_creature(randint(0, len(grid)-1), randint(0, len(grid[0])-1))
+    food_maker()
+    foods = [food_maker() for x in range(randint(2, len(grid)*2))]
+    for food in foods:
+        grid = move_to_pos(grid, food['position']['row'], food['position']['column'], creature, color_map['yellow']())
+
     app = handle_events(app)
 
     while app._running:
