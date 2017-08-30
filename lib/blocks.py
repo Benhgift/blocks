@@ -27,16 +27,11 @@ def create_creature(row=0, column=0):
     return creature
 
 
-def ask_creature_where_to_move_to(creature):
+def _ask_creature_where_to_move_to(creature):
     return ['up', 'down', 'left', 'right'][randint(0, 3)]
 
 
-def move_creature(creature, grid, color_map):
-    #import pdb; pdb.set_trace()
-    row = creature['position']['row']
-    column = creature['position']['column']
-    direction = ask_creature_where_to_move_to(creature)
-    grid[row][column] = color_map['grey']()
+def _make_new_position_but_stay_in_bounds(row, column, direction, grid):
     new_pos = [row, column]
     if row > 0 and direction == 'up':
         new_pos = [row-1, column]
@@ -46,6 +41,16 @@ def move_creature(creature, grid, color_map):
         new_pos = [row, column-1]
     elif column < (len(grid[0]) - 1) and direction == 'right':
         new_pos = [row, column+1]
+    return new_pos
+
+
+def move_creature(creature, grid, color_map):
+    #import pdb; pdb.set_trace()
+    row = creature['position']['row']
+    column = creature['position']['column']
+    direction = _ask_creature_where_to_move_to(creature)
+    grid[row][column] = color_map['grey']()
+    new_pos = _make_new_position_but_stay_in_bounds(row, column, direction, grid)
     creature['position']['row'] = new_pos[0]
     creature['position']['column'] = new_pos[1]
     grid = move_to_pos(grid, new_pos[0], new_pos[1], creature, color_map['blue']())
@@ -61,7 +66,7 @@ def create_config():
     }
 
 
-def create_default_color_map():
+def _create_default_color_map():
     blue = lambda: (0, 128, 255)
     grey = lambda: (128, randint(90, 130), 128)
     yellow = lambda: (200, randint(0, 130), 255)
@@ -71,7 +76,7 @@ def create_default_color_map():
 def main_loop():
     app = App(create_config())
 
-    color_map = create_default_color_map()
+    color_map = _create_default_color_map()
     grid = create_grid(app.width, app.height, color_map)
     creature = create_creature()
     food_maker = lambda: create_creature(randint(0, len(grid)-1), randint(0, len(grid[0])-1))

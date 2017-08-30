@@ -20,10 +20,10 @@ def test_move_a_creature_around():
 
     # now move the creature a few times and see if it explodes
     for _ in range(10):
-        blocks.move_creature
+        blocks.move_creature(creature, grid, _make_some_colors())
     assert(creature)
 
 
 def _make_some_colors():
-    color_map = {'grey': lambda: (1, 128, 1)}
+    color_map = {'grey': lambda: (1, 128, 1), 'blue': lambda: (1, 1, 1)}
     return color_map
