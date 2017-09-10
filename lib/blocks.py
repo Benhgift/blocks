@@ -19,10 +19,13 @@ def move_to_pos(grid, row, column, creature, color):
 # Creature
 def create_creature(row=0, column=0):
     creature = {
-        'position': {'row': row, 'column': column}, 
+        'row': row,
+        'column': column,
         'facing': 'south',
         'nutrition': 5,
         'hp': 500,
+        'moved': False,
+        'color': (randint(0, 255), randint(0, 255), randint(0, 255))
     }
     return creature
 
@@ -45,16 +48,17 @@ def _make_new_position_but_stay_in_bounds(row, column, direction, grid):
 
 
 def move_creature(creature, grid, color_map):
-    #import pdb; pdb.set_trace()
-    row = creature['position']['row']
-    column = creature['position']['column']
+    row = creature['row']
+    column = creature['column']
     direction = _ask_creature_where_to_move_to(creature)
     grid[row][column] = color_map['grey']()
     new_pos = _make_new_position_but_stay_in_bounds(row, column, direction, grid)
-    creature['position']['row'] = new_pos[0]
-    creature['position']['column'] = new_pos[1]
-    grid = move_to_pos(grid, new_pos[0], new_pos[1], creature, color_map['blue']())
-    return grid
+    if new_pos[0] != creature['row']:
+        creature['moved'] = True
+    creature['row'] = new_pos[0]
+    creature['column'] = new_pos[1]
+    grid = move_to_pos(grid, new_pos[0], new_pos[1], creature, creature['color'])
+    return grid, creature
 
 
 # App globals config
@@ -73,6 +77,24 @@ def _create_default_color_map():
     return {'blue': blue, 'grey': grey, 'yellow': yellow}
 
 
+def hurt_creature(creature):
+    creature['hp'] -= 5
+    if creature['moved']:
+        creature['hp'] -= 10
+        creature['moved'] = False
+    return creature
+
+
+def handle_eating(creature, foods_map):
+    pos = (creature['row'], creature['column'])
+    if pos in foods_map:
+        print(creature['hp'])
+        del foods_map[pos]
+        creature['hp'] += 50
+        print(creature['hp'])
+    return creature, foods_map
+
+
 def main_loop():
     app = App(create_config())
 
@@ -80,10 +102,13 @@ def main_loop():
     grid = create_grid(app.width, app.height, color_map)
     creature = create_creature()
     food_maker = lambda: create_creature(randint(0, len(grid)-1), randint(0, len(grid[0])-1))
-    food_maker()
-    foods = [food_maker() for x in range(randint(2, len(grid)*2))]
-    for food in foods:
-        grid = move_to_pos(grid, food['position']['row'], food['position']['column'], creature, color_map['yellow']())
+    foods_map = {}
+    for x in range(randint(2, len(grid)*2)):
+        food = food_maker()
+        foods_map[(food['row'], food['column'])] = food
+
+    for food in foods_map.values():
+        grid = move_to_pos(grid, food['row'], food['column'], creature, color_map['yellow']())
 
     app = handle_events(app)
 
@@ -91,13 +116,18 @@ def main_loop():
         render(app, grid)
 
         if not app._paused:
-            grid = move_creature(creature, grid, color_map)
+            grid, creature = move_creature(creature, grid, color_map)
+            creature, foods_map = handle_eating(creature, foods_map)
+            if creature['moved']:
+                creature = hurt_creature(creature)
+            if creature['hp'] < 1:
+                creature = create_creature()
 
         if not app._running:
             pygame.quit()
 
         app = handle_events(app)
-        time.sleep(.03)
+        time.sleep(.1)
 
 
 # App
