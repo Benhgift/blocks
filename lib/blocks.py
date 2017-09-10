@@ -87,12 +87,12 @@ def hurt_creature(creature):
 
 def handle_eating(creature, foods_map):
     pos = (creature['row'], creature['column'])
+    new_food = False
     if pos in foods_map:
-        print(creature['hp'])
         del foods_map[pos]
         creature['hp'] += 50
-        print(creature['hp'])
-    return creature, foods_map
+        new_food = True
+    return creature, foods_map, new_food
 
 
 def main_loop():
@@ -103,7 +103,7 @@ def main_loop():
     creature = create_creature()
     food_maker = lambda: create_creature(randint(0, len(grid)-1), randint(0, len(grid[0])-1))
     foods_map = {}
-    for x in range(randint(2, len(grid)*2)):
+    for x in range(len(grid)):
         food = food_maker()
         foods_map[(food['row'], food['column'])] = food
 
@@ -117,7 +117,14 @@ def main_loop():
 
         if not app._paused:
             grid, creature = move_creature(creature, grid, color_map)
-            creature, foods_map = handle_eating(creature, foods_map)
+            creature, foods_map, new_food = handle_eating(creature, foods_map)
+            if new_food:
+                food = food_maker()
+                while (food['row'], food['column']) in foods_map:
+                    food = food_maker()
+                grid = move_to_pos(grid, food['row'], food['column'], creature, color_map['yellow']())
+                foods_map[(food['row'], food['column'])] = food
+
             if creature['moved']:
                 creature = hurt_creature(creature)
             if creature['hp'] < 1:
