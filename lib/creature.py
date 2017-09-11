@@ -33,8 +33,14 @@ def _normalize_what_it_can_see(creature):
     return seeable
 
 
+def _can_it_even_see_food(creature):
+    seeable = chain.from_iterable(creature['what_it_can_see'])
+    return 'f' in seeable
+
+
 def _ask_creature_where_to_move_to(creature):
-    seeable = _normalize_what_it_can_see(creature)
+    #seeable = _normalize_what_it_can_see(creature)
+    print(_can_it_even_see_food(creature))
     return ['up', 'down', 'left', 'right'][randint(0, 3)]
 
 
