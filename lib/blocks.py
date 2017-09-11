@@ -13,7 +13,7 @@ def create_grid(width, height, colors):
     return rows
 
 
-def move_to_pos(grid, row, column, creature, color):
+def move_to_pos(grid, row, column, color):
     grid[row][column] = color
     return grid
 
@@ -35,13 +35,14 @@ def move_creature(creature, grid, color_map):
     row = creature['row']
     column = creature['column']
     direction = cre._ask_creature_where_to_move_to(creature)
+    creature['facing'] = direction
     grid[row][column] = color_map['grey']()
     new_pos = _make_new_position_but_stay_in_bounds(row, column, direction, grid)
     if new_pos[0] != creature['row']:
         creature['moved'] = True
     creature['row'] = new_pos[0]
     creature['column'] = new_pos[1]
-    grid = move_to_pos(grid, new_pos[0], new_pos[1], creature, creature['color'])
+    grid = move_to_pos(grid, new_pos[0], new_pos[1], creature['color'])
     return grid, creature
 
 
@@ -75,20 +76,31 @@ def update_creature_sight(creature, grid, foods_map):
     return creature
 
 
+def make_one_food(grid):
+    return cre.create_creature(randint(0, len(grid)-1), randint(0, len(grid[0])-1))
+
+
+def make_foods_map(grid):
+    foods_map = {}
+    for x in range(len(grid)):
+        food = make_one_food(grid)
+        foods_map[(food['row'], food['column'])] = food
+    return foods_map
+
+
+def set_food_onto_grid(grid, foods_map, color_map):
+    for food in foods_map.values():
+        grid = move_to_pos(grid, food['row'], food['column'], color_map['yellow']())
+    return grid
+
 def main_loop():
     app = gui.App()
 
     color_map = _create_default_color_map()
     grid = create_grid(app.width, app.height, color_map)
     creature = cre.create_creature()
-    food_maker = lambda: cre.create_creature(randint(0, len(grid)-1), randint(0, len(grid[0])-1))
-    foods_map = {}
-    for x in range(len(grid)):
-        food = food_maker()
-        foods_map[(food['row'], food['column'])] = food
-
-    for food in foods_map.values():
-        grid = move_to_pos(grid, food['row'], food['column'], creature, color_map['yellow']())
+    foods_map = make_foods_map(grid)
+    grid = set_food_onto_grid(grid, foods_map, color_map)
 
     app = gui.handle_events(app)
 
@@ -103,10 +115,10 @@ def main_loop():
             grid, creature = move_creature(creature, grid, color_map)
             creature, foods_map, new_food = cre.handle_eating(creature, foods_map)
             if new_food:
-                food = food_maker()
+                food = make_one_food(grid)
                 while (food['row'], food['column']) in foods_map:
-                    food = food_maker()
-                grid = move_to_pos(grid, food['row'], food['column'], creature, color_map['yellow']())
+                    food = make_one_food(grid)
+                grid = move_to_pos(grid, food['row'], food['column'], color_map['yellow']())
                 foods_map[(food['row'], food['column'])] = food
 
             if creature['moved']:
