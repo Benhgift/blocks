@@ -52,6 +52,29 @@ def _create_default_color_map():
     return {'blue': blue, 'grey': grey, 'yellow': yellow}
 
 
+def update_creature_sight(creature, grid, foods_map):
+    row, column = creature['row']-1, creature['column']-1
+    what_it_can_see = [
+        ['|', '|', '|'],
+        ['|', 'I', '|'],
+        ['|', '|', '|'],
+    ]
+    for x in range(3):
+        for y in range(3):
+            if not (0 <= (row + x) <= len(grid)):
+                continue
+            if not (0 <= (column + y) <= len(grid)):
+                continue
+            if (row + x, column + y) in foods_map:
+                target = 'f'
+            else:
+                target = 'o'
+            what_it_can_see[x][y] = target
+    what_it_can_see[1][1] = 'I'
+    creature['what_it_can_see'] = what_it_can_see
+    return creature
+
+
 def main_loop():
     app = gui.App()
 
@@ -71,6 +94,10 @@ def main_loop():
 
     while app._running:
         gui.render(app, grid)
+        print()
+        print('what it can see')
+        for line in creature['what_it_can_see']:
+            print(line)
 
         if not app._paused:
             grid, creature = move_creature(creature, grid, color_map)
@@ -86,9 +113,10 @@ def main_loop():
                 creature = cre.hurt_creature(creature)
             if creature['hp'] < 1:
                 creature = cre.create_creature()
+            creature = update_creature_sight(creature, grid, foods_map)
 
         if not app._running:
             pygame.quit()
 
         app = gui.handle_events(app)
-        time.sleep(.1)
+        time.sleep(.9)

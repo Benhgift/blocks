@@ -10,7 +10,12 @@ def create_creature(row=0, column=0):
         'nutrition': 5,
         'hp': 500,
         'moved': False,
-        'color': (randint(0, 255), randint(0, 255), randint(0, 255))
+        'color': (randint(0, 255), randint(0, 255), randint(0, 255)),
+        'what_it_can_see': [
+            ['o', 'o', 'o'],
+            ['o', 'I', 'o'],
+            ['o', 'o', 'o'],
+        ]
     }
     return creature
 
