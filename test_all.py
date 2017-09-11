@@ -1,4 +1,5 @@
 from lib import blocks
+from lib import creature as cre
 
 
 def test_the_creation_of_a_grid():
@@ -12,9 +13,9 @@ def test_the_creation_of_a_grid():
 
 def test_move_a_creature_around():
     # create a creature and a grid and make it move around
-    
+
     # a creature is just a position right now
-    creature = blocks.create_creature()
+    creature = cre.create_creature()
 
     grid = blocks.create_grid(3, 3, _make_some_colors())
 
