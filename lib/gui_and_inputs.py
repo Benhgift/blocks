@@ -22,6 +22,7 @@ class App:
         win_height = height * scale
         size = win_width, win_height
         pygame.init()
+        pygame.display.set_caption('■ BLOCKS ■')
         _display_surf = pygame.display.set_mode(size, pygame.HWSURFACE | pygame.DOUBLEBUF)
         self.__dict__.update(locals())
 
