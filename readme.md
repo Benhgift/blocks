@@ -15,4 +15,4 @@ Draw some blocks on the screen
     
     
     
-![thing](https://i.imgur.com/hR1glGv.png)
+![thing](http://g.recordit.co/QJKlzaJ7Ib.gif)
