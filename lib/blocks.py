@@ -6,6 +6,9 @@ import lib.creature as cre
 import lib.gui_and_inputs as gui
 
 
+SLEEP = .09
+
+
 # Grid
 def create_grid(width, height, colors):
     column = lambda: [colors['grey']() for _ in range(width)]
@@ -131,4 +134,4 @@ def main_loop():
             pygame.quit()
 
         app = gui.handle_events(app)
-        time.sleep(.9)
+        time.sleep(SLEEP)

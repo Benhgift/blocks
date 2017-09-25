@@ -48,6 +48,8 @@ def handle_key_press(app, event):
     if event.type == KEYDOWN:
         if event.key == K_ESCAPE:
             app._running = False
+        if event.key == K_q:
+            app._running = False
 
         if event.key == K_p:
             app._paused = not app._paused
